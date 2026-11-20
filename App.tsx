@@ -57,14 +57,17 @@ export default function App() {
   const [position,setPosition]=useState<Point|null>(null);
   const [loading,setLoading]=useState(false);
   const [history,setHistory]=useState<Route[]>([]);
-  const [replay,setReplay]=useState(false);\n  const watchRef=useRef<Location.LocationSubscription|null>(null);\n  const lastUiPoint=useRef<Point|null>(null);
+  const [replay,setReplay]=useState(false);
+  const watchRef=useRef<Location.LocationSubscription|null>(null);
+  const lastUiPoint=useRef<Point|null>(null);
 
   const pushToMap=(p:Point)=>web.current?.injectJavaScript(`window.navlogUpdate(${JSON.stringify({...p,marker:p.speedKmh<15?'person':p.speedKmh<=250?'car':'airplane'})});true;`);
   useEffect(()=>{loadHistory();},[]);
   async function loadHistory(){
     try { const deviceId=await getDeviceId(); const r=await fetch(`${API}/api/routes?deviceId=${encodeURIComponent(deviceId)}`); if(r.ok)setHistory(await r.json()); } catch {}
   }
-  useEffect(()=>()=>{watchRef.current?.remove();},[]);\n  async function startRoute(){
+  useEffect(()=>()=>{watchRef.current?.remove();},[]);
+  async function startRoute(){
     if(loading||recording)return;
     setLoading(true);
     try {
@@ -83,7 +86,12 @@ export default function App() {
         pausesUpdatesAutomatically:false,showsBackgroundLocationIndicator:true,
         foregroundService:{ notificationTitle:'NavLog записывает маршрут',notificationBody:'GPS-запись продолжается в фоне',notificationColor:'#16c7d9' }
       });
-      watchRef.current=await Location.watchPositionAsync({accuracy:Location.Accuracy.BestForNavigation,timeInterval:1000,distanceInterval:2},loc=>{\n        const c=loc.coords; const p:Point={latitude:c.latitude,longitude:c.longitude,altitude:c.altitude,accuracy:c.accuracy,speedKmh:Math.max(0,(c.speed||0)*3.6),heading:c.heading,timestamp:new Date(loc.timestamp).toISOString()};\n        if(lastUiPoint.current){const prev=lastUiPoint.current;const rad=(n:number)=>n*Math.PI/180;const dLat=rad(p.latitude-prev.latitude),dLon=rad(p.longitude-prev.longitude);const x=Math.sin(dLat/2)**2+Math.cos(rad(prev.latitude))*Math.cos(rad(p.latitude))*Math.sin(dLon/2)**2;setDistance(v=>v+2*6371000*Math.asin(Math.sqrt(x)));}\n        lastUiPoint.current=p;setPosition(p);setSpeed(p.speedKmh);pushToMap(p);\n      });\n      const first=await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.BestForNavigation});
+      watchRef.current=await Location.watchPositionAsync({accuracy:Location.Accuracy.BestForNavigation,timeInterval:1000,distanceInterval:2},loc=>{
+        const c=loc.coords; const p:Point={latitude:c.latitude,longitude:c.longitude,altitude:c.altitude,accuracy:c.accuracy,speedKmh:Math.max(0,(c.speed||0)*3.6),heading:c.heading,timestamp:new Date(loc.timestamp).toISOString()};
+        if(lastUiPoint.current){const prev=lastUiPoint.current;const rad=(n:number)=>n*Math.PI/180;const dLat=rad(p.latitude-prev.latitude),dLon=rad(p.longitude-prev.longitude);const x=Math.sin(dLat/2)**2+Math.cos(rad(prev.latitude))*Math.cos(rad(p.latitude))*Math.sin(dLon/2)**2;setDistance(v=>v+2*6371000*Math.asin(Math.sqrt(x)));}
+        lastUiPoint.current=p;setPosition(p);setSpeed(p.speedKmh);pushToMap(p);
+      });
+      const first=await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.BestForNavigation});
       const c=first.coords;
       const p:Point={latitude:c.latitude,longitude:c.longitude,altitude:c.altitude,accuracy:c.accuracy,speedKmh:Math.max(0,(c.speed||0)*3.6),heading:c.heading,timestamp:new Date(first.timestamp).toISOString()};
       setPosition(p);setSpeed(p.speedKmh);pushToMap(p);
@@ -94,7 +102,8 @@ export default function App() {
     if(!routeId)return;
     setLoading(true);
     try {
-      watchRef.current?.remove();watchRef.current=null;lastUiPoint.current=null;\n      if(await Location.hasStartedLocationUpdatesAsync(TASK))await Location.stopLocationUpdatesAsync(TASK);
+      watchRef.current?.remove();watchRef.current=null;lastUiPoint.current=null;
+      if(await Location.hasStartedLocationUpdatesAsync(TASK))await Location.stopLocationUpdatesAsync(TASK);
       const r=await fetch(`${API}/api/routes/${routeId}/finish`,{method:'POST'});
       if(!r.ok)throw new Error('Не удалось завершить маршрут на сервере.');
       await AsyncStorage.removeItem(ROUTE_KEY);
