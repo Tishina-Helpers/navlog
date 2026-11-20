@@ -11,7 +11,9 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "NavLog uses your location to record routes.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "NavLog records your route while the app is in the background.",
-        "UIBackgroundModes": ["location"]
+        "UIBackgroundModes": [
+          "location"
+        ]
       }
     },
     "android": {
@@ -26,12 +28,16 @@
       "package": "com.tishinahelpers.navlog"
     },
     "plugins": [
-      ["expo-location", {
-        "locationWhenInUsePermission": "NavLog needs location to display and record your route.",
-        "locationAlwaysAndWhenInUsePermission": "NavLog records your route when the app is in the background.",
-        "isAndroidBackgroundLocationEnabled": true,
-        "isAndroidForegroundServiceEnabled": true
-      }],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "NavLog needs location to display and record your route.",
+          "locationAlwaysAndWhenInUsePermission": "NavLog records your route when the app is in the background.",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true,
+          "isIosBackgroundLocationEnabled": true
+        }
+      ],
       "expo-task-manager",
       "expo-secure-store"
     ],
