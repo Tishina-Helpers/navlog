@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "NavLog",
+    "slug": "navlog",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "scheme": "navlog",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "NavLog uses your location to record routes.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "NavLog records your route while the app is in the background.",
+        "UIBackgroundModes": ["location"]
+      }
+    },
+    "android": {
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "POST_NOTIFICATIONS"
+      ],
+      "package": "com.tishinahelpers.navlog"
+    },
+    "plugins": [
+      ["expo-location", {
+        "locationWhenInUsePermission": "NavLog needs location to display and record your route.",
+        "locationAlwaysAndWhenInUsePermission": "NavLog records your route when the app is in the background.",
+        "isAndroidBackgroundLocationEnabled": true,
+        "isAndroidForegroundServiceEnabled": true
+      }],
+      "expo-task-manager",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "apiUrl": "https://navlog-api.onrender.com",
+      "cesiumIonToken": ""
+    }
+  }
+}
