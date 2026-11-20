@@ -62,8 +62,8 @@ export default function App() {
   const lastUiPoint=useRef<Point|null>(null);
 
   const pushToMap=(p:Point)=>web.current?.injectJavaScript(`window.navlogUpdate(${JSON.stringify({...p,marker:p.speedKmh<15?'person':p.speedKmh<=250?'car':'airplane'})});true;`);
-  useEffect(()=>{loadHistory();},[]);
-  async function loadHistory(){
+  useEffect(()=>{loadHistory();restoreActiveRoute();},[]);
+  async function restoreActiveRoute(){\n    try{const id=await AsyncStorage.getItem(ROUTE_KEY);if(id&&await Location.hasStartedLocationUpdatesAsync(TASK)){setRouteId(id);setRecording(true);}}catch{}\n  }\n  async function loadHistory(){
     try { const deviceId=await getDeviceId(); const r=await fetch(`${API}/api/routes?deviceId=${encodeURIComponent(deviceId)}`); if(r.ok)setHistory(await r.json()); } catch {}
   }
   useEffect(()=>()=>{watchRef.current?.remove();},[]);
